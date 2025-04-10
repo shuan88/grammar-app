@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📘 個人化多益文法學習</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @font-face {
+        font-family: 'LucideIcons';
+        src: url(https://cdn.jsdelivr.net/npm/lucide-static@latest/font/Lucide.ttf) format('truetype');
+      }
+      .lucide {
+        font-family: 'LucideIcons';
+        font-size: 1.25rem; /* Adjust icon size as needed */
+        line-height: 1;
+      }
+      /* Custom Duolingo-like styles */
+      :root {
+        --duo-green: #58cc02;
+        --duo-blue: #1cb0f6;
+        --duo-red: #ff4b4b;
+        --duo-gray: #e5e5e5;
+        --duo-dark-gray: #777777;
+        --duo-text: #4b4b4b;
+      }
+      body {
+        font-family: "Inter", sans-serif; /* Using Inter font */
+        color: var(--duo-text);
+      }
+      .btn {
+        @apply block w-full text-center font-bold py-3 px-4 rounded-xl border-b-4 transition-transform duration-150 ease-in-out;
+      }
+      .btn-primary {
+        @apply bg-duo-green text-white border-green-700 hover:bg-green-600 active:translate-y-0.5 active:border-b-2;
+      }
+      .btn-secondary {
+        @apply bg-white text-duo-blue border-2 border-duo-gray hover:bg-gray-100 active:translate-y-0.5 active:border-b-2;
+      }
+      .btn-disabled {
+         @apply bg-duo-gray text-duo-dark-gray border-gray-400 cursor-not-allowed opacity-70;
+      }
+      .card {
+        @apply bg-white p-6 rounded-xl border border-duo-gray shadow-sm mb-6;
+      }
+      .feedback {
+        @apply mt-4 p-4 rounded-lg font-bold text-white text-center;
+      }
+      .feedback-correct {
+        @apply bg-duo-green;
+      }
+      .feedback-incorrect {
+        @apply bg-duo-red;
+      }
+      /* Style for selected answer */
+      .option-selected {
+        @apply bg-blue-100 border-duo-blue ring-2 ring-duo-blue;
+      }
+       /* Style for correct answer highlight */
+      .option-correct {
+        @apply bg-green-100 border-duo-green text-green-800 ring-2 ring-duo-green;
+      }
+       /* Style for incorrect answer highlight */
+      .option-incorrect {
+        @apply bg-red-100 border-duo-red text-red-800 ring-2 ring-duo-red;
+      }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto max-w-2xl p-4">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-duo-green mb-2">📘 個人化多益文法學習</h1>
+            <p class="text-duo-dark-gray">針對您的弱點進行加強！</p>
+        </header>
+
+        <nav class="mb-8">
+            <label for="section-select" class="block text-sm font-medium text-gray-700 mb-1">選擇學習單元:</label>
+            <select id="section-select" class="block w-full p-3 border border-duo-gray rounded-lg focus:ring-duo-blue focus:border-duo-blue">
+                </select>
+        </nav>
+
+        <main id="content-area">
+            </main>
+
+        <footer id="summary-area" class="mt-12 card hidden">
+             <h2 class="text-2xl font-bold mb-4 flex items-center"><span class="lucide mr-2">💡</span>重點總結</h2>
+             <ul id="summary-list" class="list-disc pl-5 space-y-2 text-duo-text">
+                 </ul>
+        </footer>
+
+    </div>
+
+    <script>
+        // --- Content Data (Parsed from Markdown) ---
+        const learningData = {
+            sections: [
+                {
+                    id: "tenses",
+                    title: "⏰ 動詞時態 (Verb Tenses)",
+                    errorAnalysis: [
+                        "未能根據時間副詞（如 \"last week\", \"over the past five years\"）選擇正確的時態（過去簡單式 vs. 現在完成式）。",
+                        "在表示時間先後順序的子句中（如 \"After you...\"），未能正確使用完成式表達動作的先後。",
+                        "在描述變化的過程時（如 \"As parts of the world...\"），未能選擇合適的時態（一般現在式 vs. 現在進行式）。"
+                    ],
+                    rules: [
+                        {
+                            name: "過去簡單式 (Past Simple)",
+                            details: [
+                                "**定義與用法：** 表示過去某特定時間點發生的動作或存在的狀態。",
+                                "**結構：** 動詞過去式 (V-ed 或不規則變化)。",
+                                "**常見時間副詞：** yesterday, last week/month/year, ... ago, in + 過去年份, then。",
+                                "**考點：** 看到明確的過去時間點副詞，通常要選過去簡單式。",
+                                "**例句：** The firm **announced** last week that it will broaden its marketing scale."
+                            ]
+                        },
+                        {
+                            name: "現在完成式 (Present Perfect)",
+                            details: [
+                                "**定義與用法：** 1. 表示從過去某個時間點開始、持續到現在的動作或狀態。 2. 表示過去發生、但對現在有影響或結果的動作。 3. 表示在某個過去時間點之前完成的動作（相對於另一個過去或現在的動作）。",
+                                "**結構：** have/has + 過去分詞 (Past Participle)。",
+                                "**常見時間副詞：** since..., for..., over the past/last + 時間段, already, yet, just, recently, lately, up to now。",
+                                "**考點：** 看到 \"since\", \"for\", \"over the past...\" 等表示一段時間的詞語，常選現在完成式。在 \"After/Before\" 子句中，若要強調某動作在主要子句動作之前完成，可用現在完成式。",
+                                "**例句：** Taylor Swift **has received** multiple awards over the past five years. After you **have completed** the attached form, please send it to us."
+                            ]
+                        },
+                         {
+                            name: "一般現在式 (Simple Present)",
+                            details: [
+                                "**定義與用法：** 描述普遍真理、事實、習慣性動作，或表示一個持續的狀態。在時間或條件子句中，常用來代替未來式。描述變化的過程或趨勢時，若非強調當下正在進行，也可用一般現在式。",
+                                "**結構：** 原形動詞（第三人稱單數+s/es）。",
+                                "**考點：** 注意主詞單複數與動詞的一致性。區分描述事實/習慣與描述當下進行的動作。",
+                                "**例句：** As parts of the world **become** uninhabitable, millions will try to migrate. (描述一個變化的趨勢/事實)"
+                            ]
+                        }
+                    ],
+                    exercises: [
+                        {
+                            question: "1. Mr. Evans ________ (work) for this company for ten years, and he plans to continue.",
+                            options: ["(A) worked", "(B) has worked", "(C) works", "(D) is working"],
+                            answer: 1 // Index of the correct option (0-based)
+                        },
+                        {
+                            question: "2. The manager ________ (sign) the contract yesterday afternoon.",
+                            options: ["(A) signed", "(B) has signed", "(C) signs", "(D) will sign"],
+                            answer: 0
+                        },
+                         {
+                            question: "3. If it ________ (rain) tomorrow, the picnic will be cancelled.",
+                            options: ["(A) will rain", "(B) is raining", "(C) rains", "(D) rained"],
+                            answer: 2
+                        }
+                    ]
+                },
+                {
+                    id: "voice",
+                    title: "🗣️ 動詞語態 (Active vs. Passive Voice)",
+                    errorAnalysis: [
+                        "未能判斷主詞是動作的執行者還是接受者，導致主動/被動語態混淆。",
+                        "在情態動詞 (Modal Verbs) 後面使用被動語態時，結構錯誤 (應為 modal + be + p.p.)。"
+                    ],
+                     rules: [
+                        {
+                            name: "主動語態 (Active Voice)",
+                            details: [
+                                "**定義與用法：** 主詞是執行動作的人或物。",
+                                "**結構：** 主詞 + 動詞 + (受詞)",
+                                "**例句：** The company **grants** employees stock options."
+                            ]
+                        },
+                         {
+                            name: "被動語態 (Passive Voice)",
+                            details: [
+                                "**定義與用法：** 主詞是接受動作的人或物。通常用來強調動作的承受者，或當執行者不明、不重要或顯而易見時。",
+                                "**結構：** 主詞 + be 動詞 (依時態變化) + 過去分詞 (p.p.) + (by + 執行者)",
+                                "**考點：** 判斷主詞與動詞之間的關係。注意不同時態的被動語態結構（如過去簡單被動: was/were + p.p.; 現在簡單被動: am/is/are + p.p.; 未來簡單被動: will be + p.p.; 現在完成被動: has/have been + p.p.; 情態動詞被動: modal + be + p.p.）。",
+                                "**例句：** Mr. White **was nominated** for president in April 2015. It is essential that it **be shaken** first. His main goal will **be realized** in the near future."
+                            ]
+                        }
+                    ],
+                    exercises: [
+                         {
+                            question: "1. The new software ________ (develop) by the IT team last month.",
+                            options: ["(A) developed", "(B) was developed", "(C) has developed", "(D) develops"],
+                            answer: 1
+                        },
+                        {
+                            question: "2. All participants ________ (require) to register before the deadline.",
+                            options: ["(A) require", "(B) requires", "(C) are required", "(D) requiring"],
+                            answer: 2
+                        },
+                         {
+                            question: "3. This task must ________ (complete) by Friday.",
+                            options: ["(A) complete", "(B) completed", "(C) be completed", "(D) completing"],
+                            answer: 2
+                        }
+                    ]
+                },
+                {
+                    id: "pos",
+                    title: "🧩 詞性辨別與應用 (Parts of Speech)",
+                     errorAnalysis: [
+                        "在需要名詞的位置誤選其他詞性。",
+                        "在需要形容詞修飾名詞的位置誤選其他詞性。",
+                        "在需要動詞的位置誤選其他詞性。",
+                        "在需要副詞修飾動詞或形容詞的位置誤選其他詞性。"
+                    ],
+                     rules: [
+                        { name: "名詞 (Noun)", details: ["表示人、事、地、物、概念。常作主詞、受詞、補語或介系詞的受詞。 (例: knowledge, contribution, records)"] },
+                        { name: "動詞 (Verb)", details: ["表示動作或狀態。 (例: announced, demands, express)"] },
+                        { name: "形容詞 (Adjective)", details: ["修飾名詞或代名詞，說明其性質或狀態。常放在名詞前或 be 動詞/連綴動詞後。 (例: verifiable, intellectual, capable, versatile, frustrating, diverse)"] },
+                        { name: "副詞 (Adverb)", details: ["修飾動詞、形容詞、其他副詞或整個句子，說明時間、地點、方式、程度等。 (例: properly, closely, perfectly, meanwhile)"] },
+                        { name: "🎯 考試重點", details: [
+                            "分析句子結構，判斷空格處應填入哪種詞性的詞。",
+                            "注意詞尾變化（如 -tion, -ment, -ness 常為名詞；-able, -ible, -ive, -al, -ous 常為形容詞；-ly 常為副詞）。",
+                            "根據語意選擇最恰當的詞。"
+                        ]}
+                    ],
+                    exercises: [
+                        {
+                            question: "1. The company needs to improve its ________ (efficient).",
+                            options: ["(A) efficient", "(B) efficiently", "(C) efficiency", "(D) efficients"],
+                            answer: 2
+                        },
+                        {
+                            question: "2. Please handle these documents ________ (careful).",
+                            options: ["(A) careful", "(B) carefully", "(C) care", "(D) caring"],
+                            answer: 1
+                        },
+                         {
+                            question: "3. This is a highly ________ (compete) market.",
+                            options: ["(A) compete", "(B) competitive", "(C) competition", "(D) competitively"],
+                            answer: 1
+                        }
+                    ]
+                },
+                 {
+                    id: "adjectives",
+                    title: "✨ 形容詞用法 (Adjective Usage)",
+                    errorAnalysis: [
+                        "未能根據語意選擇最合適的形容詞。",
+                        "混淆 -ing 形容詞（令人...的）和 -ed 形容詞（感到...的）。",
+                        "並列形容詞形式未能保持一致。"
+                    ],
+                    rules: [
+                         { name: "形容詞功能", details: ["修飾名詞或代名詞，描述其特徵、狀態。"] },
+                         { name: "位置", details: ["通常放在名詞前，或 be 動詞/連綴動詞 (appear, seem, become, feel, look, sound, taste, smell) 之後作主詞補語。"] },
+                         { name: "-ing vs. -ed 形容詞", details: [
+                             "**-ing 形容詞：** 描述事物或人的特質，帶有「令人...的」意思 (e.g., interesting book, boring movie, frustrating season)。",
+                             "**-ed 形容詞：** 描述人（有時是動物）的感受，帶有「感到...的」意思 (e.g., interested student, bored audience, frustrated player)。"
+                         ]},
+                         { name: "並列形容詞", details: ["當多個形容詞修飾同一個名詞時，它們通常形式一致。"] },
+                         { name: "🎯 考點", details: [
+                             "根據上下文語意選擇最貼切的形容詞。",
+                             "正確區分 -ing 和 -ed 形容詞的用法。",
+                             "注意形容詞在句中的位置。"
+                         ]}
+                    ],
+                    exercises: [
+                        {
+                            question: "1. The presentation was very ________ (inform). Everyone learned a lot.",
+                            options: ["(A) informed", "(B) informing", "(C) informative", "(D) information"],
+                            answer: 2
+                        },
+                        {
+                            question: "2. I was ________ (surprise) to see him at the party.",
+                            options: ["(A) surprised", "(B) surprising", "(C) surprise", "(D) surprisingly"],
+                            answer: 0
+                        },
+                         {
+                            question: "3. We need someone who is reliable, experienced, and ________ (dedicate).",
+                            options: ["(A) dedicate", "(B) dedicating", "(C) dedicated", "(D) dedication"],
+                            answer: 2
+                        }
+                    ]
+                },
+                 {
+                    id: "adverbs",
+                    title: "🚀 副詞用法 (Adverb Usage)",
+                    errorAnalysis: [
+                        "未能根據語意選擇最合適的副詞來修飾動詞。",
+                        "未能選擇合適的轉折/連接副詞來表達句間邏輯。"
+                    ],
+                    rules: [
+                        { name: "副詞功能", details: ["修飾動詞（說明動作如何發生）、形容詞（加強語氣）、其他副詞（加強語氣）或整個句子。"] },
+                        { name: "常見種類", details: [
+                            "**方式副詞 (How?)**: carefully, slowly, quickly, properly, closely, perfectly",
+                            "**時間副詞 (When?)**: now, then, yesterday, soon, already, recently",
+                            "**地點副詞 (Where?)**: here, there, nearby, everywhere",
+                            "**頻率副詞 (How often?)**: always, usually, often, sometimes, never",
+                            "**程度副詞 (To what extent?)**: very, quite, too, extremely, considerably, nearly",
+                            "**連接副詞 (Connecting ideas)**: however, therefore, moreover, meanwhile, furthermore, consequently"
+                        ]},
+                         { name: "🎯 考點", details: [
+                            "根據需要修飾的詞語和語意選擇正確的副詞。",
+                            "注意副詞在句中的位置。",
+                            "區分形容詞和副詞。"
+                         ]}
+                    ],
+                    exercises: [
+                         {
+                            question: "1. She adapted ________ (quick) to the new environment.",
+                            options: ["(A) quick", "(B) quicker", "(C) quickly", "(D) quickness"],
+                            answer: 2
+                        },
+                        {
+                            question: "2. The report was ________ well-written.",
+                            options: ["(A) extreme", "(B) extremely", "(C) extremity", "(D) extremer"],
+                            answer: 1
+                        },
+                         {
+                            question: "3. He didn't study hard; ________, he failed the exam.",
+                            options: ["(A) moreover", "(B) therefore", "(C) however", "(D) meanwhile"],
+                            answer: 1 // Assuming 'therefore' is the intended answer for cause/effect
+                        }
+                    ]
+                },
+                {
+                    id: "conjunctions-prepositions",
+                    title: "🔗 連接詞與介系詞 (Conjunctions & Prepositions)",
+                    errorAnalysis: [
+                        "混淆連接詞（連接子句）和介系詞（後接名詞/名詞片語/動名詞）。",
+                        "未能根據子句間的邏輯關係選擇正確的連接詞。",
+                        "未能使用正確的連接詞連接詞語。",
+                        "未能使用正確的介系詞或固定搭配。"
+                    ],
+                    rules: [
+                        { name: "連接詞 (Conjunctions)", details: [
+                            "**功能：** 連接單字、片語或子句。",
+                            "**對等連接詞 (Coordinating):** 連接語法結構相同的成分 (e.g., and, but, or, so, for, nor, yet)。",
+                            "**從屬連接詞 (Subordinating):** 引導從屬子句，表達時間 (when, while, before, after), 原因 (because, since, as), 條件 (if, unless), 對比/讓步 (although, though, even though, while), 目的 (so that, in order that), 結果 (so...that, such...that)。 **注意：從屬連接詞後面必須接一個完整的子句（主詞+動詞）。**"
+                        ]},
+                        { name: "介系詞 (Prepositions)", details: [
+                             "**功能：** 表示其後的名詞、代名詞或動名詞與句子中其他詞語的關係（時間、地點、方向、原因、方式等）。",
+                             "**常見介系詞：** in, on, at, for, with, to, from, about, over, under, beside, between, against, despite, in spite of。",
+                             "**注意：介系詞後面必須接名詞、代名詞或動名詞 (V-ing)。**"
+                        ]},
+                        { name: "固定搭配 (Collocations)", details: ["很多動詞、名詞、形容詞常與特定的介系詞搭配，需要記憶。 (e.g., contribute *to*, responsible *for*, capable *of*, interested *in*, depend *on*, campaign *against*, in accordance *with*, between A *and* B, time *for* sth)"] },
+                         { name: "🎯 考點", details: [
+                            "判斷空格後是子句還是名詞/片語，決定用連接詞還是介系詞。",
+                            "根據邏輯關係選擇正確的連接詞。",
+                            "熟悉介系詞的意義和固定搭配。"
+                         ]}
+                    ],
+                    exercises: [
+                        {
+                            question: "1. ________ the bad weather, the flight was cancelled.",
+                            options: ["(A) Although", "(B) Because", "(C) Due to", "(D) Since"],
+                            answer: 2
+                        },
+                        {
+                            question: "2. You cannot enter the building ________ you have a valid ID card.",
+                            options: ["(A) if", "(B) unless", "(C) because", "(D) while"],
+                            answer: 1
+                        },
+                         {
+                            question: "3. She is very good ________ playing the piano.",
+                            options: ["(A) in", "(B) on", "(C) with", "(D) at"],
+                            answer: 3
+                        }
+                    ]
+                },
+                {
+                    id: "other",
+                    title: "🎯 其他重要文法點",
+                    errorAnalysis: [], // Keep it simple for this section
+                    rules: [
+                        { name: "假設語氣 (Conditionals - Past Unreal)", details: ["**規則：** If + 主詞 + had + p.p., 主詞 + would/could/might + have + p.p.", "**例句：** If they **had asked** earlier, it **would have been** more successful."] },
+                        { name: "主詞動詞一致性 (Subject-Verb Agreement)", details: ["**規則：** 動名詞片語 (Gerund phrase) 作主詞時，視為單數。", "**例句：** **Catering** to the tastes... **demands** a great deal of skill."] },
+                        { name: "使役動詞 (Causative Verbs)", details: ["**規則：** make/have/let + 受詞 + 原形動詞 (V)。 (Get + 受詞 + to + V)", "**例句：** Jack Ma's words **made** the audience **cheer**."] },
+                        { name: "不定詞表目的 (Infinitives of Purpose)", details: ["**規則：** 不定詞可用來表示動作的目的或原因。", "**例句：** The policy **to regulate** the fishing industry..."] },
+                        { name: "代名詞格位 (Pronoun Case)", details: ["**規則：** 主格 (I, he, she, we, they) 作主詞；受格 (me, him, her, us, them) 作動詞或介系詞的受詞。", "**例句：** ...we may not treat **them** to a dinner."] },
+                        { name: "限定詞 (Determiners)", details: ["**規則：** All + 複數名詞/不可數名詞；Every/Each + 單數名詞。Each of + 複數名詞 + 單數動詞。", "**例句：** ...workers must receive proper **all** safety training... **Each** of our tour packages **includes**..."] },
+                        { name: "分詞作形容詞 (Participles as Adjectives)", details: ["**規則：** 現在分詞 (-ing) 表示主動或進行；過去分詞 (-ed) 表示被動或完成。", "**例句：** ...this idea proposal is **submitted** gratuitously... ...employers... will be **conducting** interviews..."] }
+                    ],
+                    exercises: [] // No exercises for the 'other' section in this example
+                },
+                {
+                   id: "vocab",
+                   title: "🧠 詞彙與文意理解",
+                   errorAnalysis: ["多次錯誤來自於未能根據上下文選擇最符合語意邏輯的詞彙或句子。"],
+                   rules: [
+                       { name: "💡 學習建議", details: [
+                           "**擴充詞彙量：** 持續背誦多益常見單字，特別是商業、辦公室、旅遊、購物等情境的詞彙。",
+                           "**注意詞語搭配：** 學習常見的動詞+名詞、形容詞+名詞、動詞+介系詞等搭配。",
+                           "**上下文推敲：** 練習從前後文推測詞義或句子涵義。",
+                           "**邏輯判斷：** 閱讀題目時，思考選項是否符合整句話或整段文章的邏輯。"
+                       ]}
+                   ],
+                   exercises: []
+                }
+            ],
+            summary: [
+                "**⏰ 時態準確性：** 密切注意時間副詞，判斷動作發生的時間點或時間段，正確選用簡單式或完成式。",
+                "**🗣️ 語態判斷：** 分辨主詞是執行者還是接受者，正確使用主動或被動語態，特別注意被動語態的結構 (be + p.p.)。",
+                "**🧩 詞性辨識：** 根據句子結構（主詞、動詞、受詞、修飾語）判斷所需詞性，注意詞尾變化。",
+                "**✨ 形容詞/🚀 副詞區分：** 形容詞修飾名詞/代名詞；副詞修飾動詞/形容詞/副詞/句子。注意 -ing/-ed 形容詞用法。",
+                "**🔗 連接詞 vs. 介系詞：** 連接詞後接子句（主詞+動詞）；介系詞後接名詞/代名詞/動名詞。根據邏輯關係和固定搭配選用。",
+                "**📚 固定搭配與詞彙：** 加強記憶常見的詞語搭配 (動詞+介系詞等) 和核心詞彙，提升文意理解能力。",
+                "**🎯 細節規則：** 留意假設語氣、主詞動詞一致、使役動詞、不定詞、代名詞格位、限定詞、分詞等特定規則。"
+            ]
+        };
+
+        // --- DOM Elements ---
+        const sectionSelect = document.getElementById('section-select');
+        const contentArea = document.getElementById('content-area');
+        const summaryArea = document.getElementById('summary-area');
+        const summaryList = document.getElementById('summary-list');
+
+        // --- State ---
+        let currentSectionId = learningData.sections[0].id;
+        let exerciseStates = {}; // Store state for each exercise { selectedOption: null, answered: false }
+
+        // --- Functions ---
+
+        // Populate navigation dropdown
+        function populateNav() {
+            learningData.sections.forEach(section => {
+                const option = document.createElement('option');
+                option.value = section.id;
+                option.textContent = section.title;
+                sectionSelect.appendChild(option);
+            });
+            // Add summary option
+            const summaryOption = document.createElement('option');
+            summaryOption.value = 'summary';
+            summaryOption.textContent = '💡 重點總結';
+            sectionSelect.appendChild(summaryOption);
+        }
+
+        // Render content for the selected section
+        function renderContent(sectionId) {
+            contentArea.innerHTML = ''; // Clear previous content
+            summaryArea.classList.add('hidden'); // Hide summary
+
+            if (sectionId === 'summary') {
+                renderSummary();
+                return; // Stop here if summary is selected
+            }
+
+            const section = learningData.sections.find(s => s.id === sectionId);
+            if (!section) return;
+
+            // Reset exercise states for the new section
+            exerciseStates[sectionId] = section.exercises.map(() => ({ selectedOption: null, answered: false }));
+
+
+            // Section Title
+            const title = document.createElement('h2');
+            title.className = 'text-2xl font-bold mb-6 text-center';
+            title.textContent = section.title;
+            contentArea.appendChild(title);
+
+            // Error Analysis Card
+            if (section.errorAnalysis && section.errorAnalysis.length > 0) {
+                const errorCard = document.createElement('div');
+                errorCard.className = 'card bg-red-50 border-red-200';
+                errorCard.innerHTML = `
+                    <h3 class="text-xl font-bold mb-3 text-red-700 flex items-center"><span class="lucide mr-2">⚠️</span>您的錯誤點分析</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-red-800">
+                        ${section.errorAnalysis.map(err => `<li>${err}</li>`).join('')}
+                    </ul>
+                `;
+                contentArea.appendChild(errorCard);
+            }
+
+            // Rules Card
+            if (section.rules && section.rules.length > 0) {
+                const rulesCard = document.createElement('div');
+                rulesCard.className = 'card';
+                rulesCard.innerHTML = `<h3 class="text-xl font-bold mb-4 flex items-center"><span class="lucide mr-2">📖</span>文法規則詳解</h3>`;
+                section.rules.forEach(rule => {
+                    const ruleDiv = document.createElement('div');
+                    ruleDiv.className = 'mb-4 pb-4 border-b border-duo-gray last:border-b-0';
+                    ruleDiv.innerHTML = `
+                        <h4 class="font-semibold text-lg mb-2 text-duo-blue">${rule.name}</h4>
+                        <ul class="list-disc pl-5 space-y-1 text-sm">
+                           ${rule.details.map(det => `<li>${det.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')}</li>`).join('')}
+                        </ul>
+                    `;
+                    rulesCard.appendChild(ruleDiv);
+                });
+                contentArea.appendChild(rulesCard);
+            }
+
+            // Exercises Card
+            if (section.exercises && section.exercises.length > 0) {
+                const exercisesCard = document.createElement('div');
+                exercisesCard.className = 'card';
+                exercisesCard.innerHTML = `<h3 class="text-xl font-bold mb-4 flex items-center"><span class="lucide mr-2">📝</span>練習題</h3>`;
+                section.exercises.forEach((exercise, index) => {
+                    const exerciseDiv = document.createElement('div');
+                    exerciseDiv.id = `exercise-${sectionId}-${index}`;
+                    exerciseDiv.className = 'mb-6 pb-6 border-b border-duo-gray last:border-b-0';
+                    exerciseDiv.innerHTML = `
+                        <p class="font-semibold mb-4">${exercise.question}</p>
+                        <div class="space-y-3">
+                            ${exercise.options.map((option, optionIndex) => `
+                                <button
+                                    class="btn btn-secondary option-btn"
+                                    data-section="${sectionId}"
+                                    data-exercise="${index}"
+                                    data-option="${optionIndex}">
+                                    ${option}
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="feedback-container mt-4"></div> <button class="btn btn-primary check-btn mt-4 btn-disabled" disabled data-section="${sectionId}" data-exercise="${index}">檢查答案</button>
+                    `;
+                    exercisesCard.appendChild(exerciseDiv);
+                });
+                contentArea.appendChild(exercisesCard);
+            }
+        }
+
+        // Render Summary
+        function renderSummary() {
+             summaryList.innerHTML = learningData.summary
+                .map(point => `<li>${point.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>')}</li>`)
+                .join('');
+             summaryArea.classList.remove('hidden');
+        }
+
+
+        // Handle option selection
+        function handleOptionSelect(event) {
+            const button = event.target.closest('.option-btn');
+            if (!button) return;
+
+            const sectionId = button.dataset.section;
+            const exerciseIndex = parseInt(button.dataset.exercise);
+            const optionIndex = parseInt(button.dataset.option);
+
+            // Prevent changing answer after checking
+            if (exerciseStates[sectionId][exerciseIndex].answered) return;
+
+            // Update state
+            exerciseStates[sectionId][exerciseIndex].selectedOption = optionIndex;
+
+            // Update UI
+            const exerciseContainer = document.getElementById(`exercise-${sectionId}-${exerciseIndex}`);
+            const optionButtons = exerciseContainer.querySelectorAll('.option-btn');
+            const checkButton = exerciseContainer.querySelector('.check-btn');
+
+            optionButtons.forEach(btn => btn.classList.remove('option-selected'));
+            button.classList.add('option-selected');
+
+            // Enable check button
+            checkButton.disabled = false;
+            checkButton.classList.remove('btn-disabled');
+            checkButton.classList.add('btn-primary');
+        }
+
+        // Handle check answer
+        function handleCheckAnswer(event) {
+            const button = event.target.closest('.check-btn');
+            if (!button || button.disabled) return;
+
+            const sectionId = button.dataset.section;
+            const exerciseIndex = parseInt(button.dataset.exercise);
+
+            const section = learningData.sections.find(s => s.id === sectionId);
+            const exercise = section.exercises[exerciseIndex];
+            const state = exerciseStates[sectionId][exerciseIndex];
+            const selectedOptionIndex = state.selectedOption;
+            const correctAnswerIndex = exercise.answer;
+
+            // Mark as answered
+            state.answered = true;
+
+            const exerciseContainer = document.getElementById(`exercise-${sectionId}-${exerciseIndex}`);
+            const optionButtons = exerciseContainer.querySelectorAll('.option-btn');
+            const feedbackContainer = exerciseContainer.querySelector('.feedback-container');
+
+            // Disable option buttons and check button
+            optionButtons.forEach(btn => btn.disabled = true);
+            button.disabled = true;
+            button.classList.add('btn-disabled');
+            button.classList.remove('btn-primary');
+
+
+            // Provide feedback
+            feedbackContainer.innerHTML = ''; // Clear previous feedback
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.className = 'feedback';
+
+            if (selectedOptionIndex === correctAnswerIndex) {
+                feedbackDiv.classList.add('feedback-correct');
+                feedbackDiv.innerHTML = '<span class="lucide mr-1">✅</span>做得好！';
+                // Highlight selected (correct) option
+                 optionButtons[selectedOptionIndex].classList.add('option-correct');
+                 optionButtons[selectedOptionIndex].classList.remove('option-selected', 'btn-secondary');
+
+            } else {
+                feedbackDiv.classList.add('feedback-incorrect');
+                feedbackDiv.innerHTML = `<span class="lucide mr-1">❌</span>正確答案：${exercise.options[correctAnswerIndex]}`;
+                 // Highlight selected (incorrect) option in red
+                if (selectedOptionIndex !== null) {
+                    optionButtons[selectedOptionIndex].classList.add('option-incorrect');
+                    optionButtons[selectedOptionIndex].classList.remove('option-selected', 'btn-secondary');
+                }
+                 // Highlight correct option in green
+                 optionButtons[correctAnswerIndex].classList.add('option-correct');
+                 optionButtons[correctAnswerIndex].classList.remove('btn-secondary');
+            }
+            feedbackContainer.appendChild(feedbackDiv);
+
+             // Remove selected style from non-correct/non-incorrect buttons if needed
+             optionButtons.forEach((btn, index) => {
+                if (index !== selectedOptionIndex && index !== correctAnswerIndex) {
+                     btn.classList.remove('option-selected');
+                }
+             });
+        }
+
+        // --- Event Listeners ---
+        sectionSelect.addEventListener('change', (event) => {
+            currentSectionId = event.target.value;
+            renderContent(currentSectionId);
+            window.scrollTo(0, 0); // Scroll to top on section change
+        });
+
+        // Use event delegation for exercise buttons
+        contentArea.addEventListener('click', (event) => {
+            if (event.target.closest('.option-btn')) {
+                handleOptionSelect(event);
+            } else if (event.target.closest('.check-btn')) {
+                handleCheckAnswer(event);
+            }
+        });
+
+
+        // --- Initial Load ---
+        populateNav();
+        renderContent(currentSectionId); // Render the first section initially
+
+    </script>
+
+</body>
+</html>
